@@ -5,19 +5,25 @@ import PackageDescription
 
 let package = Package(
     name: "webview-youtube-player",
+    platforms: [
+        .iOS(.v15),
+    ],
     products: [
-        // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
-            name: "webview-youtube-player",
-            targets: ["webview-youtube-player"]),
+            name: "YoutubeWebView",
+            targets: ["YoutubeWebView"]
+        ),
     ],
     targets: [
-        // Targets are the basic building blocks of a package, defining a module or a test suite.
-        // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "webview-youtube-player"),
+            name: "YoutubeWebView",
+            path: "Sources",
+            resources: [.process("Resources/YoutubeIframe.html")],
+            publicHeadersPath: "."
+        ),
         .testTarget(
-            name: "webview-youtube-playerTests",
-            dependencies: ["webview-youtube-player"]),
+            name: "YoutubeWebViewTests",
+            dependencies: ["YoutubeWebView"]
+        ),
     ]
 )

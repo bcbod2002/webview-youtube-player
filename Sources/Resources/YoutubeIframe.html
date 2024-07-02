@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <!-- <link rel="stylesheet" href="./YoutubeIframe.css" type="text/css" /> -->
+    <!-- <link href="./CSS/YoutubeIframe.css" rel="stylesheet" /> -->
+    <style>
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        /* background-color: rgba(189, 16, 16, 0); */
+      }
+      html {
+        width: 100%;
+        height: 100%;
+        /* background-color: rgba(77, 235, 20, 0); */
+      }
+
+      /* .youtube-iframe-player iframe,
+      .youtube-iframe-player object, */
+      .youtube-iframe-player embed {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100% !important;
+        height: 100% !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="youtube-iframe-player">
+      <div id="player"></div>
+    </div>
+    <script
+      src="https://www.youtube.com/iframe_api"
+      onerror="window.location.href='ytplayer://onYouTubeIframeAPIFailedToLoad'"
+    ></script>
+    <script>
+      var player;
+      var error = false;
+
+      function prepareYoutubePlayer() {
+        player = new YT.Player("player", %@);
+        player.setSize(window.innerWidth, window.innerHeight);
+        sendPlayerEvent("onYouTubeIframeAPIReady");
+      }
+
+      // function prepareYoutubePlayer() {
+      //   player = new YT.Player("player", {
+      //     playerVars: {
+      //       playerInline: 1,
+      //     },
+      //     events: {
+      //       onStateChange: "onStateChange",
+      //       onReady: "onReady",
+      //       onError: "onError",
+      //       onPlaybackQualityChange: "onQualityChange",
+      //     },
+      //     videoId: "drCnFueS4og",
+      //     width: "393.0",
+      //     height: "719.0",
+      //   });
+      //   player.setSize(window.innerWidth, window.innerHeight);
+      //   sendPlayerEvent("onYouTubeIframeAPIReady");
+      // }
+
+      function sendPlayerEvent(eventName, data) {
+        var pratHref = "ytplayer://" + eventName;
+        if (data) {
+          pratHref = pratHref + "?data=" + data;
+        }
+        window.location.href = pratHref;
+      }
+
+      function getCurrentTime() {
+        var state = player.getPlayerState();
+        if (state == YT.PlayerState.PLAYING) {
+          time = player.getCurrentTime();
+          sendPlayerEvent("onPlayTime", time);
+        }
+      }
+
+      function onReady(event) {
+        window.location.href = "ytplayer://onReady?data=" + event.data;
+      }
+
+      function onStateChange(event) {
+        if (!error) {
+          sendPlayerEvent("onStateChange", event.data);
+        } else {
+          error = false;
+        }
+      }
+
+      function onQualityChange(event) {
+        sendPlayerEvent("onPlaybackQualityChange", event.data);
+      }
+
+      function onError(event) {
+        error = true;
+        sendPlayerEvent("onError", event.data);
+      }
+
+      window.onresize = function () {
+        player.setSize(window.innerWidth, window.innerHeight);
+      };
+    </script>
+  </body>
+</html>
