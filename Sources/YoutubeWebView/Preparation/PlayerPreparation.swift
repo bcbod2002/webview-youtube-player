@@ -31,14 +31,14 @@ public struct PlayerPreparation {
         }
     }
     
-    public func prepareHTML(with videoID: String, size: CGSize) throws -> String {
+    public func prepareHTML(with videoID: String, size: CGSize, autoPlay: Bool) throws -> String {
         let templateURL = Bundle.module.url(forResource: "YoutubeIframe", withExtension: "html")
         guard let templateURL else { throw PlayerError.html }
         do {
             let data = try Data(contentsOf: templateURL)
             let htmlTemplate = String(data: data, encoding: .utf8)
             guard let htmlTemplate else { throw PlayerError.html }
-            let parameters = PlayerParameters(size: size, videoID: videoID)
+            let parameters = PlayerParameters(size: size, videoID: videoID, autoPlay: autoPlay)
         
             let encodedData = try jsonEncoder.encode(consume parameters)
             let encodedString = String(data: consume encodedData, encoding: .utf8)

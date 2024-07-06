@@ -52,17 +52,18 @@
       // function prepareYoutubePlayer() {
       //   player = new YT.Player("player", {
       //     playerVars: {
-      //       playerInline: 1,
+      //       playsinline: 1,
+      //       autoplay: 0,
       //     },
       //     events: {
-      //       onStateChange: "onStateChange",
       //       onReady: "onReady",
-      //       onError: "onError",
+      //       onStateChange: "onStateChange",
       //       onPlaybackQualityChange: "onQualityChange",
-      //     },
+      //       onError: "onError",
+      //     }
       //     videoId: "drCnFueS4og",
       //     width: "393.0",
-      //     height: "719.0",
+      //     height: "393.0",
       //   });
       //   player.setSize(window.innerWidth, window.innerHeight);
       //   sendPlayerEvent("onYouTubeIframeAPIReady");
@@ -86,11 +87,29 @@
 
       function onReady(event) {
         window.location.href = "ytplayer://onReady?data=" + event.data;
+        window.webkit.messageHandlers.onReady.postMessage({"data": event.data});
+      }
+
+      function play() {
+        player.playVideo();
+      }
+
+      function stop() {
+        player.stopVideo();
+      }
+
+      function pause() {
+        player.pause();
+      }
+
+      function forward(seconds) {
+        player.seekTo(seconds, false);
       }
 
       function onStateChange(event) {
         if (!error) {
           sendPlayerEvent("onStateChange", event.data);
+          window.webkit.messageHandlers.onStateChange.postMessage({"data": event.data});
         } else {
           error = false;
         }
@@ -103,6 +122,10 @@
       function onError(event) {
         error = true;
         sendPlayerEvent("onError", event.data);
+      }
+
+      function play() {
+        player.playVideo();
       }
 
       window.onresize = function () {
