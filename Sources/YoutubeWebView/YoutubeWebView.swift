@@ -45,6 +45,9 @@ public class YoutubeWebView: UIView {
     }
     
     public func arrange(_ videoURLs: [URL?], autoPlay: Bool = false) throws {
+    public func add(_ witness: YoutubeWitness) {
+        witnesses.append(witness)
+    }
         let urls = videoURLs.compactMap { $0 }
         let preparation = PlayerPreparation()
         videoIDs = try ContiguousArray(unsafeUninitializedCapacity: urls.count) { buffer, initializedCount in
@@ -92,12 +95,54 @@ extension YoutubeWebView: WKScriptMessageHandler {
     public func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         switch message.name {
         case "onReady" where autoPlay:
+            webView.configuration.allowsInlineMediaPlayback = true
             execute(.play)
-            print("onReady = \(message.body)")
+            webView.configuration.allowsInlineMediaPlayback = false
+            witnessOnReady(with: message.body)
         case "onStateChange":
-            print("onStateChage = \(message.body)")
+            witnessOnStateChange(with: message.body)
+        case "onQualityChange":
+            witnessOnQualityChange(with: message.body)
+        case "onError":
+            witnessOnError(with: message.body)
         default:
             break
+        }
+    }
+    
+    private func witnessOnReady(with body: Any) {
+        guard let body = body as? [String: String], let data = body["data"] else { return }
+        witnesses.forEach { witness in
+            witness.onReadys.forEach { closure in
+                closure(data)
+            }
+        }
+    }
+    
+    private func witnessOnStateChange(with body: Any) {
+        guard let body = body as? [String: String], let data = body["data"] else { return }
+        witnesses.forEach { witness in
+            witness.onStateChanges.forEach { closure in
+                closure(data)
+            }
+        }
+    }
+    
+    private func witnessOnQualityChange(with body: Any) {
+        guard let body = body as? [String: String], let data = body["data"] else { return }
+        witnesses.forEach { witness in
+            witness.onQualityChanges.forEach { closure in
+                closure(data)
+            }
+        }
+    }
+    
+    private func witnessOnError(with body: Any) {
+        guard let body = body as? [String: String], let data = body["data"] else { return }
+        witnesses.forEach { witness in
+            witness.onErrors.forEach { closure in
+                closure(data)
+            }
         }
     }
 }
