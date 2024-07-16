@@ -7,11 +7,6 @@
 
 import Foundation
 
-
-struct PlayerVars: Encodable {
-    let playerInline = 1
-}
-
 struct PlayerEvents: Encodable {
     let onReady = "onReady"
     let onStateChange = "onStateChange"
@@ -19,12 +14,21 @@ struct PlayerEvents: Encodable {
     let onError = "onError"
 }
 
+struct PlayerVars: Encodable {
+    let controls: Int
+    let loop: Int
+    
+    init(showControls: Bool, keepLoop: Bool) {
+        controls = showControls ? 1 : 0
+        loop = keepLoop ? 1 : 0
+    }
+}
 
 struct PlayerParameters: Encodable {
     let height: CGFloat
     let width: CGFloat
     let videoID: String
-    let playerVars: PlayerVars = PlayerVars()
+    let playerVars: PlayerVars
     let events: PlayerEvents = PlayerEvents()
     
     enum CodingKeys: String, CodingKey {
@@ -35,10 +39,11 @@ struct PlayerParameters: Encodable {
         case events
     }
     
-    init(size: CGSize, videoID: String) {
+    init(size: CGSize, videoID: String, showControls: Bool, keepLoop: Bool) {
         self.height = size.height
         self.width = size.width
         self.videoID = videoID
+        self.playerVars = PlayerVars(showControls: showControls, keepLoop: keepLoop)
     }
     
     func encode(to encoder: any Encoder) throws {
