@@ -11,11 +11,17 @@ public class YoutubeWebView: UIView {
     
     private static let baseURL = "https://www.youtube.com/watch?v="
     
-    private let webView: WKWebView = WKWebView()
+    private let webView: WKWebView
     private var videoIDs: ContiguousArray<String> = []
     private var autoPlay = false
+    private var witnesses: ContiguousArray<YoutubeWitness> = []
     
     required init?(coder: NSCoder) {
+        let configuration = WKWebViewConfiguration()
+        configuration.allowsInlineMediaPlayback = true
+        configuration.mediaTypesRequiringUserActionForPlayback = .all
+        webView = WKWebView(frame: .zero, configuration: configuration)
+        
         super.init(coder: coder)
         configure()
         addSubview(webView)
@@ -23,6 +29,11 @@ public class YoutubeWebView: UIView {
     }
     
     override init(frame: CGRect) {
+        let configuration = WKWebViewConfiguration()
+        configuration.allowsInlineMediaPlayback = true
+        configuration.mediaTypesRequiringUserActionForPlayback = .all
+        webView = WKWebView(frame: .zero, configuration: configuration)
+        
         super.init(frame: frame)
         configure()
         addSubview(webView)
@@ -31,9 +42,11 @@ public class YoutubeWebView: UIView {
     
     private func configure() {
         webView.navigationDelegate = self
-        webView.configuration.allowsInlineMediaPlayback = true
+        
         webView.configuration.userContentController.add(self, name: "onReady")
         webView.configuration.userContentController.add(self, name: "onStateChange")
+        webView.configuration.userContentController.add(self, name: "onQualityChange")
+        webView.configuration.userContentController.add(self, name: "onError")
     }
     
     private func constraint() {
@@ -44,10 +57,17 @@ public class YoutubeWebView: UIView {
         webView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
     }
     
-    public func arrange(_ videoURLs: [URL?], autoPlay: Bool = false) throws {
     public func add(_ witness: YoutubeWitness) {
         witnesses.append(witness)
     }
+    
+    public func arrange(
+        _ videoURLs: [URL?],
+        autoPlay: Bool = false,
+        inlineMedia: Bool = true,
+        showControl: Bool = true,
+        keepLoop: Bool = false
+    ) throws {
         let urls = videoURLs.compactMap { $0 }
         let preparation = PlayerPreparation()
         videoIDs = try ContiguousArray(unsafeUninitializedCapacity: urls.count) { buffer, initializedCount in
@@ -57,17 +77,37 @@ public class YoutubeWebView: UIView {
             initializedCount = videoURLs.count
         }
         guard let videoID = videoIDs.first else { throw PlayerError.url }
-        let html = try preparation.prepareHTML(with: videoID, size: bounds.size, autoPlay: autoPlay)
+        let html = try preparation.prepareHTML(
+            with: videoID,
+            size: bounds.size,
+            autoPlay: autoPlay,
+            showControls: showControl,
+            keepLoop: keepLoop
+        )
         self.autoPlay = autoPlay
+        webView.configuration.allowsInlineMediaPlayback = inlineMedia
         webView.loadHTMLString(html, baseURL: urls.first)
     }
     
-    public func arrange(videoIDs: [String], autoPlay: Bool = false) throws {
+    public func arrange(
+        videoIDs: [String],
+        autoPlay: Bool = false,
+        inlineMedia: Bool = true,
+        showControl: Bool = true,
+        keepLoop: Bool = false
+    ) throws {
         let preparation = PlayerPreparation()
         self.videoIDs = ContiguousArray(videoIDs)
         guard let videoID = videoIDs.first else { throw PlayerError.url }
-        let html = try preparation.prepareHTML(with: videoID, size: bounds.size, autoPlay: autoPlay)
+        let html = try preparation.prepareHTML(
+            with: videoID,
+            size: bounds.size,
+            autoPlay: autoPlay,
+            showControls: showControl,
+            keepLoop: keepLoop
+        )
         self.autoPlay = autoPlay
+        webView.configuration.allowsInlineMediaPlayback = inlineMedia
         webView.loadHTMLString(html, baseURL: URL(string: "\(Self.baseURL)\(videoID)"))
     }
     
