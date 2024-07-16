@@ -49,26 +49,6 @@
         sendPlayerEvent("onYouTubeIframeAPIReady");
       }
 
-      // function prepareYoutubePlayer() {
-      //   player = new YT.Player("player", {
-      //     playerVars: {
-      //       playsinline: 1,
-      //       autoplay: 0,
-      //     },
-      //     events: {
-      //       onReady: "onReady",
-      //       onStateChange: "onStateChange",
-      //       onPlaybackQualityChange: "onQualityChange",
-      //       onError: "onError",
-      //     }
-      //     videoId: "drCnFueS4og",
-      //     width: "393.0",
-      //     height: "393.0",
-      //   });
-      //   player.setSize(window.innerWidth, window.innerHeight);
-      //   sendPlayerEvent("onYouTubeIframeAPIReady");
-      // }
-
       function sendPlayerEvent(eventName, data) {
         var pratHref = "ytplayer://" + eventName;
         if (data) {
@@ -90,6 +70,26 @@
         window.webkit.messageHandlers.onReady.postMessage({"data": event.data});
       }
 
+      function onStateChange(event) {
+        if (!error) {
+          sendPlayerEvent("onStateChange", event.data);
+          window.webkit.messageHandlers.onStateChange.postMessage({"data": event.data});
+        } else {
+          error = false;
+        }
+      }
+
+      function onQualityChange(event) {
+        sendPlayerEvent("onPlaybackQualityChange", event.data);
+        window.webkit.messageHandlers.onQualityChange.postMessage({"data": event.data});
+      }
+
+      function onError(event) {
+        error = true;
+        sendPlayerEvent("onError", event.data);
+        window.webkit.messageHandlers.onError.postMessage({"data": event.data});
+      }
+
       function play() {
         player.playVideo();
       }
@@ -104,28 +104,6 @@
 
       function forward(seconds) {
         player.seekTo(seconds, false);
-      }
-
-      function onStateChange(event) {
-        if (!error) {
-          sendPlayerEvent("onStateChange", event.data);
-          window.webkit.messageHandlers.onStateChange.postMessage({"data": event.data});
-        } else {
-          error = false;
-        }
-      }
-
-      function onQualityChange(event) {
-        sendPlayerEvent("onPlaybackQualityChange", event.data);
-      }
-
-      function onError(event) {
-        error = true;
-        sendPlayerEvent("onError", event.data);
-      }
-
-      function play() {
-        player.playVideo();
       }
 
       window.onresize = function () {
