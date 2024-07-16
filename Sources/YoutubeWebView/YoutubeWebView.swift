@@ -86,8 +86,39 @@ public class YoutubeWebView: UIView {
 }
 
 extension YoutubeWebView: WKNavigationDelegate {
+    public func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction) async -> WKNavigationActionPolicy {
+        let request = navigationAction.request
+        guard let scheme = request.url?.scheme else { return .cancel }
+        switch scheme {
+        case "ytplayer":
+            witnesses.forEach { witness in
+                witness.onErrors.forEach { closure in
+                    closure(.url)
+                }
+            }
+            return .cancel
+        case "http", "https":
+            return .allow
+        default:
+            witnesses.forEach { witness in
+                witness.onErrors.forEach { closure in
+                    closure(.url)
+                }
+            }
+            return .cancel
+        }
+    }
+    
     public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         webView.evaluateJavaScript("prepareYoutubePlayer()")
+    }
+    
+    public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: any Error) {
+        witnesses.forEach { witness in
+            witness.onErrors.forEach { closure in
+                closure(.unknown(error))
+            }
+        }
     }
 }
 
@@ -141,7 +172,7 @@ extension YoutubeWebView: WKScriptMessageHandler {
         guard let body = body as? [String: String], let data = body["data"] else { return }
         witnesses.forEach { witness in
             witness.onErrors.forEach { closure in
-                closure(data)
+                closure(IFrameError(code: data))
             }
         }
     }

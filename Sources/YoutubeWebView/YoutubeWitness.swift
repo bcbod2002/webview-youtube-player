@@ -12,13 +12,13 @@ final public class YoutubeWitness {
     var onReadys: ContiguousArray<(String) -> Void>
     var onStateChanges: ContiguousArray<(String) -> Void>
     var onQualityChanges: ContiguousArray<(String) -> Void>
-    var onErrors: ContiguousArray<(String) -> Void>
+    var onErrors: ContiguousArray<(IFrameError) -> Void>
     
     public init() {
         self.onReadys = ContiguousArray<(String) -> Void>()
         self.onStateChanges = ContiguousArray<(String) -> Void>()
         self.onQualityChanges = ContiguousArray<(String) -> Void>()
-        self.onErrors = ContiguousArray<(String) -> Void>()
+        self.onErrors = ContiguousArray<(IFrameError) -> Void>()
     }
     
     @discardableResult
@@ -40,7 +40,7 @@ final public class YoutubeWitness {
     }
     
     @discardableResult
-    public func onError(incident: @escaping (String) -> Void) -> Self {
+    public func onError(incident: @escaping (IFrameError) -> Void) -> Self {
         onErrors.append(incident)
         return self
     }
