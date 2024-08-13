@@ -1,5 +1,5 @@
 //
-//  PleyerCommand.swift
+//  PlayerCommand.swift
 //  
 //
 //  Created by Goston Wu on 29/6/2024.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum PleyerCommand: ~Copyable {
+public enum PlayerCommand: ~Copyable {
     case play
     case stop
     case pause
