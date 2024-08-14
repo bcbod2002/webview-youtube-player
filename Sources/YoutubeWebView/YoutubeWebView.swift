@@ -72,7 +72,7 @@ public struct YoutubeWebView: UIViewRepresentable {
         do {
             if !contruction.videoURLs.isEmpty {
                 try uiView.arrange(
-                    contruction.videoURLs,
+                    videoURLs: contruction.videoURLs,
                     autoPlay: contruction.autoPlay,
                     inlineMedia: contruction.inlineMedia,
                     showControl: contruction.showControl,

@@ -2,11 +2,6 @@ import Foundation
 import UIKit
 import WebKit
 
-public protocol VideoParceable {
-    init(_ url: URL)
-    init(_ videoID: String)
-}
-
 public class YoutubeWebUIView: UIView {
     
     private static let baseURL = "https://www.youtube.com/watch?v="
@@ -61,8 +56,9 @@ public class YoutubeWebUIView: UIView {
         witnesses.append(witness)
     }
     
+    // TODO: Video list is still not done yet
     public func arrange(
-        _ videoURLs: [URL?],
+        videoURLs: [URL?],
         autoPlay: Bool = false,
         inlineMedia: Bool = true,
         showControl: Bool = true,
@@ -89,6 +85,7 @@ public class YoutubeWebUIView: UIView {
         webView.loadHTMLString(html, baseURL: urls.first)
     }
     
+    // TODO: Video list is still not done yet
     public func arrange(
         videoIDs: [String],
         autoPlay: Bool = false,
